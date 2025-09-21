@@ -84,10 +84,12 @@ class _ChatMainPanelState extends State<ChatMainPanel>
 
   Widget _buildTopBar() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
 
     return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      height: isMobile ? 56 : 60,
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.secondaryElementDark
@@ -99,82 +101,117 @@ class _ChatMainPanelState extends State<ChatMainPanel>
           ),
         ),
       ),
-      child: Row(
-        children: [
-          // AI Status
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.accentPositive.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.accentPositive,
-                    shape: BoxShape.circle,
+      child: SafeArea(
+        child: Row(
+          children: [
+            // Menu button for mobile sidebar
+            if (isMobile)
+              IconButton(
+                onPressed: () {
+                  // This will be handled by the parent chat screen
+                  // We need to pass this action up
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: isDark
+                      ? AppColors.primaryTextDark
+                      : AppColors.primaryText,
+                ),
+                iconSize: 24,
+              ),
+
+            // AI Status - compact on mobile
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 12,
+                vertical: isMobile ? 4 : 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.accentPositive.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: isMobile ? 6 : 8,
+                    height: isMobile ? 6 : 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accentPositive,
+                      shape: BoxShape.circle,
+                    ),
                   ),
+                  SizedBox(width: isMobile ? 6 : 8),
+                  Text(
+                    isMobile ? 'Online' : 'AI Online',
+                    style: AppTypography.caption(
+                      color: AppColors.accentPositive,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            // Session info - shortened on mobile
+            if (!isMobile)
+              Text(
+                'Wellness Session',
+                style: AppTypography.h5(
+                  color: isDark
+                      ? AppColors.primaryTextDark
+                      : AppColors.primaryText,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'AI Online',
-                  style: AppTypography.caption(color: AppColors.accentPositive),
+              )
+            else
+              Text(
+                'Serene AI',
+                style: AppTypography.h5(
+                  color: isDark
+                      ? AppColors.primaryTextDark
+                      : AppColors.primaryText,
                 ),
-              ],
+              ),
+
+            const Spacer(),
+
+            // Voice mode toggle
+            IconButton(
+              onPressed: () {
+                widget.onVoiceModeToggle();
+                if (widget.isVoiceModeActive) {
+                  _voiceAnimationController.repeat();
+                  _pulseAnimationController.repeat();
+                } else {
+                  _voiceAnimationController.stop();
+                  _pulseAnimationController.stop();
+                }
+              },
+              icon: Icon(
+                widget.isVoiceModeActive ? Icons.keyboard : Icons.mic,
+                color: widget.isVoiceModeActive
+                    ? AppColors.accentPrimary
+                    : (isDark
+                          ? AppColors.primaryTextDark
+                          : AppColors.primaryText),
+              ),
+              iconSize: isMobile ? 22 : 24,
             ),
-          ),
 
-          const Spacer(),
-
-          // Session info
-          Text(
-            'Wellness Session',
-            style: AppTypography.h5(
-              color: isDark ? AppColors.primaryTextDark : AppColors.primaryText,
+            // Profile toggle
+            IconButton(
+              onPressed: widget.onProfileToggle,
+              icon: Icon(
+                Icons.person,
+                color: isDark
+                    ? AppColors.primaryTextDark
+                    : AppColors.primaryText,
+              ),
+              iconSize: isMobile ? 22 : 24,
             ),
-          ),
-
-          const Spacer(),
-
-          // Voice mode toggle
-          IconButton(
-            onPressed: () {
-              widget.onVoiceModeToggle();
-              if (widget.isVoiceModeActive) {
-                _voiceAnimationController.repeat();
-                _pulseAnimationController.repeat();
-              } else {
-                _voiceAnimationController.stop();
-                _pulseAnimationController.stop();
-              }
-            },
-            icon: Icon(
-              widget.isVoiceModeActive ? Icons.keyboard : Icons.mic,
-              color: widget.isVoiceModeActive
-                  ? AppColors.accentAction
-                  : (isDark
-                        ? AppColors.primaryTextDark
-                        : AppColors.primaryText),
-            ),
-            tooltip: widget.isVoiceModeActive
-                ? 'Switch to Text'
-                : 'Switch to Voice',
-          ),
-
-          // Profile toggle
-          IconButton(
-            onPressed: widget.onProfileToggle,
-            icon: Icon(
-              Icons.person_outline,
-              color: isDark ? AppColors.primaryTextDark : AppColors.primaryText,
-            ),
-            tooltip: 'Profile',
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -507,9 +544,11 @@ class _ChatMainPanelState extends State<ChatMainPanel>
 
   Widget _buildInputArea() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.secondaryElementDark
@@ -521,86 +560,107 @@ class _ChatMainPanelState extends State<ChatMainPanel>
           ),
         ),
       ),
-      child: Row(
-        children: [
-          // Attachment button
-          IconButton(
-            onPressed: () {
-              // TODO: Handle attachments
-            },
-            icon: Icon(
-              Icons.attach_file,
-              color: isDark
-                  ? AppColors.primaryTextDark.withOpacity(0.7)
-                  : AppColors.primaryText.withOpacity(0.7),
-            ),
-          ),
-
-          // Text input
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.primaryBackgroundDark
-                    : AppColors.primaryBackground,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isDark ? AppColors.dividerDark : AppColors.divider,
-                ),
-              ),
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Message your AI companion...',
-                  hintStyle: AppTypography.bodyMedium(
-                    color: isDark
-                        ? AppColors.primaryTextDark.withOpacity(0.5)
-                        : AppColors.primaryText.withOpacity(0.5),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-                style: AppTypography.bodyMedium(
-                  color: isDark
-                      ? AppColors.primaryTextDark
-                      : AppColors.primaryText,
-                ),
-                maxLines: null,
-                onChanged: (text) {
-                  setState(() {
-                    _isTyping = text.isNotEmpty;
-                  });
+      child: SafeArea(
+        child: Row(
+          children: [
+            // Attachment button (hidden on mobile when typing to save space)
+            if (!isMobile || !_isTyping)
+              IconButton(
+                onPressed: () {
+                  // TODO: Handle attachments
                 },
-                onSubmitted: (_) => _sendMessage(),
+                icon: Icon(
+                  Icons.attach_file,
+                  color: isDark
+                      ? AppColors.primaryTextDark.withOpacity(0.7)
+                      : AppColors.primaryText.withOpacity(0.7),
+                ),
+                iconSize: isMobile ? 24 : 24,
+              ),
+
+            // Text input
+            Expanded(
+              child: Container(
+                constraints: BoxConstraints(
+                  minHeight: isMobile ? 44 : 48, // Minimum touch target
+                  maxHeight: isMobile ? 120 : 200, // Prevent overflow
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.primaryBackgroundDark
+                      : AppColors.primaryBackground,
+                  borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
+                  border: Border.all(
+                    color: isDark ? AppColors.dividerDark : AppColors.divider,
+                  ),
+                ),
+                child: TextField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                    hintText: isMobile
+                        ? 'Message...'
+                        : 'Message your AI companion...',
+                    hintStyle: AppTypography.bodyMedium(
+                      color: isDark
+                          ? AppColors.primaryTextDark.withOpacity(0.5)
+                          : AppColors.primaryText.withOpacity(0.5),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 20,
+                      vertical: isMobile ? 10 : 12,
+                    ),
+                  ),
+                  style: AppTypography.bodyMedium(
+                    color: isDark
+                        ? AppColors.primaryTextDark
+                        : AppColors.primaryText,
+                  ),
+                  maxLines: isMobile ? 3 : null, // Limit lines on mobile
+                  textInputAction: TextInputAction.send,
+                  onChanged: (text) {
+                    setState(() {
+                      _isTyping = text.isNotEmpty;
+                    });
+                  },
+                  onSubmitted: (_) => _sendMessage(),
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(width: 8),
+            SizedBox(width: isMobile ? 8 : 8),
 
-          // Send/Voice button
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: _isTyping
-                  ? AppColors.accentPrimary
-                  : AppColors.accentAction,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              onPressed: _isTyping ? _sendMessage : _startVoiceInput,
-              icon: Icon(
-                _isTyping ? Icons.send : Icons.mic,
-                color: Colors.white,
-                size: 20,
+            // Send/Voice button with larger touch target on mobile
+            Container(
+              width: isMobile ? 44 : 48,
+              height: isMobile ? 44 : 48,
+              decoration: BoxDecoration(
+                color: _isTyping
+                    ? AppColors.accentPrimary
+                    : AppColors.accentAction,
+                shape: BoxShape.circle,
+                boxShadow: isMobile
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: IconButton(
+                onPressed: _isTyping ? _sendMessage : _startVoiceInput,
+                icon: Icon(
+                  _isTyping ? Icons.send : Icons.mic,
+                  color: Colors.white,
+                  size: isMobile ? 20 : 20,
+                ),
+                splashRadius: isMobile ? 22 : 24, // Better touch feedback
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

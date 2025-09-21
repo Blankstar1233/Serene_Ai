@@ -112,10 +112,14 @@ class Journey {
   double get progress =>
       tasks.isEmpty ? 0.0 : completedTasksCount / tasks.length;
 
-  JourneyTask? get currentTask =>
-      tasks.where((task) => !task.isCompleted).isNotEmpty
-      ? tasks.where((task) => !task.isCompleted).first
-      : null;
+  JourneyTask? get currentTask {
+    try {
+      final incompleteTasks = tasks.where((task) => !task.isCompleted).toList();
+      return incompleteTasks.isNotEmpty ? incompleteTasks.first : null;
+    } catch (e) {
+      return null;
+    }
+  }
 
   Journey copyWith({
     String? id,

@@ -6,6 +6,7 @@ import 'home/dashboard_screen.dart';
 import 'chat/chat_screen.dart';
 import 'explore/explore_screen.dart';
 import 'progress/progress_screen.dart';
+import 'widgets/app_drawer.dart';
 
 /// Main navigation controller with bottom tab bar
 class MainNavigation extends StatefulWidget {
@@ -39,6 +40,14 @@ class _MainNavigationState extends State<MainNavigation> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      drawer: AppDrawer(
+        currentIndex: _currentIndex,
+        onNavigate: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
