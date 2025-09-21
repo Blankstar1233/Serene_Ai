@@ -21,42 +21,80 @@ class DashboardScreen extends StatelessWidget {
               slivers: [
                 // App Bar with greeting
                 SliverAppBar(
-                  expandedHeight: 100,
+                  expandedHeight: 140,
                   floating: false,
                   pinned: false,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            appState.getGreeting(),
-                            style: AppTypography.greeting(
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? AppColors.primaryTextDark
-                                  : AppColors.primaryText,
-                            ),
+                  flexibleSpace: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final percent =
+                          ((constraints.maxHeight - kToolbarHeight) /
+                                  (140 - kToolbarHeight))
+                              .clamp(0.0, 1.0);
+
+                      return FlexibleSpaceBar(
+                        background: Container(
+                          padding: const EdgeInsets.fromLTRB(
+                            24.0,
+                            24.0,
+                            24.0,
+                            16.0,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _getSubtitle(appState),
-                            style: AppTypography.bodyMedium(
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? AppColors.primaryTextDark.withOpacity(0.7)
-                                  : AppColors.primaryText.withOpacity(0.7),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (percent > 0.5) ...[
+                                Text(
+                                  appState.getGreeting(),
+                                  style: AppTypography.greeting(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? AppColors.primaryTextDark
+                                        : AppColors.primaryText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _getSubtitle(appState),
+                                  style: AppTypography.bodyMedium(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? AppColors.primaryTextDark.withOpacity(
+                                            0.7,
+                                          )
+                                        : AppColors.primaryText.withOpacity(
+                                            0.7,
+                                          ),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ] else ...[
+                                // Show only greeting when collapsed
+                                Text(
+                                  appState.getGreeting(),
+                                  style: AppTypography.h4(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? AppColors.primaryTextDark
+                                        : AppColors.primaryText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
 
