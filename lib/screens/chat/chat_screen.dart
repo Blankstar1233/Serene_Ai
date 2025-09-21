@@ -3,8 +3,10 @@ import '../../core/theme/app_colors.dart';
 import '../widgets/chat_sidebar.dart';
 import '../widgets/chat_main_panel.dart';
 import '../widgets/profile_panel.dart';
+import '../../services/audio_recording_service.dart';
+import '../../services/elevenlabs_service.dart';
 
-/// Advanced chat screen with three-panel layout
+/// Advanced chat screen with three-panel layout and speech-to-text
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -16,6 +18,16 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isVoiceModeActive = false;
   bool _isSidebarCollapsed = false;
   bool _isProfileVisible = true;
+  bool _isRecording = false;
+  bool _isTranscribing = false;
+  String? _transcribedText;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize ElevenLabs API key on app start
+    ElevenLabsService.initializeApiKey();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +74,9 @@ class _ChatScreenState extends State<ChatScreen> {
               Expanded(
                 child: ChatMainPanel(
                   isVoiceModeActive: _isVoiceModeActive,
+                  isRecording: _isRecording,
+                  isTranscribing: _isTranscribing,
+                  transcribedText: _transcribedText,
                   onVoiceModeToggle: () {
                     setState(() {
                       _isVoiceModeActive = !_isVoiceModeActive;
@@ -77,6 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       });
                     }
                   },
+                  onStartRecording: _startRecording,
+                  onStopRecording: _stopRecording,
+                  onTranscriptionReceived: _onTranscriptionReceived,
                 ),
               ),
 
@@ -127,6 +145,113 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  /// Start audio recording
+  Future<void> _startRecording() async {
+    try {
+      setState(() {
+        _isRecording = true;
+      });
+
+      final success = await AudioRecordingService.startRecording();
+      if (!success) {
+        setState(() {
+          _isRecording = false;
+        });
+        _showErrorSnackBar(
+          'Failed to start recording. Please check microphone permissions.',
+        );
+      } else {
+        _showInfoSnackBar('Recording started... Release to stop');
+      }
+    } catch (e) {
+      setState(() {
+        _isRecording = false;
+      });
+      _showErrorSnackBar('Error starting recording: $e');
+    }
+  }
+
+  /// Stop recording and process transcription
+  Future<void> _stopRecording() async {
+    try {
+      setState(() {
+        _isRecording = false;
+        _isTranscribing = true;
+      });
+
+      _showInfoSnackBar('Processing transcription...');
+
+      final recordingPath = await AudioRecordingService.stopRecording();
+
+      if (recordingPath != null) {
+        // Send to ElevenLabs for transcription
+        final result = await ElevenLabsService.speechToText(recordingPath);
+
+        if (result.isSuccess && result.text != null) {
+          // Set transcribed text to pass to ChatMainPanel
+          setState(() {
+            _transcribedText = result.text!;
+          });
+          _showSuccessSnackBar('Transcription completed successfully');
+        } else {
+          _showErrorSnackBar(result.error ?? 'Transcription failed');
+        }
+
+        // Clean up the temporary audio file
+        await AudioRecordingService.cleanupRecording(recordingPath);
+      } else {
+        _showErrorSnackBar('No recording found to transcribe');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Error processing recording: $e');
+    } finally {
+      setState(() {
+        _isTranscribing = false;
+      });
+    }
+  }
+
+  /// Handle transcription result
+  void _onTranscriptionReceived(String text) {
+    // Clear transcribed text after it's been used
+    setState(() {
+      _transcribedText = null;
+    });
+  }
+
+  /// Show success message
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.accentPositive,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Show info message
+  void _showInfoSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.accentPrimary,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Show error message
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.accentNegative,
+        duration: const Duration(seconds: 3),
       ),
     );
   }

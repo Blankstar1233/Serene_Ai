@@ -46,6 +46,20 @@ dependencies:
   
   # UI components
   flutter_svg: ^2.0.10+1
+  
+  # Audio recording and file handling
+  flutter_sound: ^9.2.13
+  permission_handler: ^11.3.1
+  path_provider: ^2.1.1
+  
+  # HTTP requests
+  http: ^1.1.0
+  
+  # Secure storage for API keys
+  flutter_secure_storage: ^9.0.0
+  
+  # File utilities
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
