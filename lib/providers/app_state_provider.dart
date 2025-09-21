@@ -16,6 +16,13 @@ class AppStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleTheme() {
+    _themeMode = _themeMode == ThemeMode.light
+        ? ThemeMode.dark
+        : ThemeMode.light;
+    notifyListeners();
+  }
+
   // User data
   UserProfile? _userProfile;
   UserProfile? get userProfile => _userProfile;
@@ -23,6 +30,17 @@ class AppStateProvider extends ChangeNotifier {
   void setUserProfile(UserProfile profile) {
     _userProfile = profile;
     notifyListeners();
+  }
+
+  void updateUserPreference(String key, dynamic value) {
+    if (_userProfile != null) {
+      final updatedPreferences = Map<String, dynamic>.from(
+        _userProfile!.preferences,
+      );
+      updatedPreferences[key] = value;
+      _userProfile = _userProfile!.copyWith(preferences: updatedPreferences);
+      notifyListeners();
+    }
   }
 
   // Current journey
