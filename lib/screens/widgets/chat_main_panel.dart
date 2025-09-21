@@ -9,14 +9,26 @@ import 'dart:math' as math;
 /// Main chat panel with messages and voice features
 class ChatMainPanel extends StatefulWidget {
   final bool isVoiceModeActive;
+  final bool isRecording;
+  final bool isTranscribing;
+  final String? transcribedText;
   final VoidCallback onVoiceModeToggle;
   final VoidCallback onProfileToggle;
+  final VoidCallback onStartRecording;
+  final VoidCallback onStopRecording;
+  final Function(String) onTranscriptionReceived;
 
   const ChatMainPanel({
     super.key,
     required this.isVoiceModeActive,
+    this.isRecording = false,
+    this.isTranscribing = false,
+    this.transcribedText,
     required this.onVoiceModeToggle,
     required this.onProfileToggle,
+    required this.onStartRecording,
+    required this.onStopRecording,
+    required this.onTranscriptionReceived,
   });
 
   @override
@@ -42,6 +54,22 @@ class _ChatMainPanelState extends State<ChatMainPanel>
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
+  }
+
+  @override
+  void didUpdateWidget(ChatMainPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Handle transcribed text updates
+    if (widget.transcribedText != null &&
+        widget.transcribedText != oldWidget.transcribedText &&
+        widget.transcribedText!.isNotEmpty) {
+      _messageController.text = widget.transcribedText!;
+      setState(() {
+        _isTyping = true;
+      });
+      // Clear the transcribed text after use
+      widget.onTranscriptionReceived('');
+    }
   }
 
   @override
@@ -630,6 +658,42 @@ class _ChatMainPanelState extends State<ChatMainPanel>
 
             SizedBox(width: isMobile ? 8 : 8),
 
+            // Voice recording button (when voice mode is active)
+            if (widget.isVoiceModeActive) ...[
+              GestureDetector(
+                onTapDown: (_) => widget.onStartRecording(),
+                onTapUp: (_) => widget.onStopRecording(),
+                onTapCancel: () => widget.onStopRecording(),
+                child: Container(
+                  width: isMobile ? 56 : 60,
+                  height: isMobile ? 56 : 60,
+                  decoration: BoxDecoration(
+                    color: widget.isRecording
+                        ? AppColors.accentNegative
+                        : AppColors.accentPrimary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (widget.isRecording
+                                    ? AppColors.accentNegative
+                                    : AppColors.accentPrimary)
+                                .withOpacity(0.3),
+                        blurRadius: widget.isRecording ? 15 : 8,
+                        spreadRadius: widget.isRecording ? 5 : 2,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    widget.isRecording ? Icons.stop : Icons.mic,
+                    color: Colors.white,
+                    size: isMobile ? 24 : 28,
+                  ),
+                ),
+              ),
+              SizedBox(width: isMobile ? 8 : 8),
+            ],
+
             // Send/Voice button with larger touch target on mobile
             Container(
               width: isMobile ? 44 : 48,
@@ -649,15 +713,30 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                       ]
                     : null,
               ),
-              child: IconButton(
-                onPressed: _isTyping ? _sendMessage : _startVoiceInput,
-                icon: Icon(
-                  _isTyping ? Icons.send : Icons.mic,
-                  color: Colors.white,
-                  size: isMobile ? 20 : 20,
-                ),
-                splashRadius: isMobile ? 22 : 24, // Better touch feedback
-              ),
+              child: widget.isTranscribing
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: _isTyping
+                          ? _sendMessage
+                          : widget.onVoiceModeToggle,
+                      icon: Icon(
+                        _isTyping
+                            ? Icons.send
+                            : (widget.isVoiceModeActive
+                                  ? Icons.keyboard
+                                  : Icons.mic),
+                        color: Colors.white,
+                        size: isMobile ? 20 : 20,
+                      ),
+                      splashRadius: isMobile ? 22 : 24, // Better touch feedback
+                    ),
             ),
           ],
         ),
@@ -704,10 +783,12 @@ class _ChatMainPanelState extends State<ChatMainPanel>
     });
   }
 
-  void _startVoiceInput() {
-    widget.onVoiceModeToggle();
-    _voiceAnimationController.repeat();
-    _pulseAnimationController.repeat();
+  /// Handle transcribed text from speech-to-text
+  void setTranscribedText(String text) {
+    _messageController.text = text;
+    setState(() {
+      _isTyping = text.isNotEmpty;
+    });
   }
 
   String _generateAIResponse(String userMessage) {

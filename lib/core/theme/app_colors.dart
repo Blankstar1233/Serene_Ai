@@ -17,6 +17,9 @@ class AppColors {
   static const Color accentPrimary = Color(0xFF82A0D8); // Calming blue
   static const Color accentPositive = Color(0xFF7DCEA0); // Soft green
   static const Color accentAction = Color(0xFFF7B7A3); // Muted coral
+  static const Color accentNegative = Color(
+    0xFFE74C3C,
+  ); // Soft red for errors/stop
 
   // Additional semantic colors
   static const Color divider = Color(0xFFE0E0E0);
