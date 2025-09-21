@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_state_provider.dart';
+import '../../models/journey.dart';
+import '../../models/mood_entry.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import 'dart:math' as math;
@@ -154,7 +156,6 @@ class _ProgressScreenState extends State<ProgressScreen>
                         ),
                         const SizedBox(height: 16),
 
-                        // Journey progress
                         if (appState.activeJourney != null)
                           _buildJourneyProgress(
                             appState.activeJourney!,
@@ -280,12 +281,13 @@ class _ProgressScreenState extends State<ProgressScreen>
     );
   }
 
-  Widget _buildJourneyProgress(dynamic journey, bool isDark) {
-    final currentDay = journey.currentDay ?? 1;
-    final totalTasks = journey.tasks?.length ?? 7;
-    final completedTasks =
-        journey.tasks?.where((task) => task.isCompleted).length ?? 0;
-    final progress = completedTasks / totalTasks;
+  Widget _buildJourneyProgress(Journey journey, bool isDark) {
+    final currentDay = journey.currentDay;
+    final totalTasks = journey.tasks.length;
+    final completedTasks = journey.tasks
+        .where((task) => task.isCompleted)
+        .length;
+    final progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(24),
