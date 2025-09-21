@@ -117,7 +117,7 @@ class _ChatMainPanelState extends State<ChatMainPanel>
 
     return Container(
       height: isMobile ? 56 : 60,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.secondaryElementDark
@@ -134,101 +134,117 @@ class _ChatMainPanelState extends State<ChatMainPanel>
           children: [
             // Menu button for mobile sidebar
             if (isMobile)
-              IconButton(
-                onPressed: () {
-                  // This will be handled by the parent chat screen
-                  // We need to pass this action up
-                },
-                icon: Icon(
-                  Icons.menu,
-                  color: isDark
-                      ? AppColors.primaryTextDark
-                      : AppColors.primaryText,
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    // This will be handled by the parent chat screen
+                    // We need to pass this action up
+                  },
+                  icon: Icon(
+                    Icons.menu,
+                    color: isDark
+                        ? AppColors.primaryTextDark
+                        : AppColors.primaryText,
+                  ),
+                  iconSize: 20,
                 ),
-                iconSize: 24,
               ),
 
             // AI Status - compact on mobile
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 8 : 12,
-                vertical: isMobile ? 4 : 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.accentPositive.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: isMobile ? 6 : 8,
-                    height: isMobile ? 6 : 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.accentPositive,
-                      shape: BoxShape.circle,
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 6 : 10,
+                  vertical: isMobile ? 3 : 5,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.accentPositive.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: isMobile ? 5 : 7,
+                      height: isMobile ? 5 : 7,
+                      decoration: const BoxDecoration(
+                        color: AppColors.accentPositive,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: isMobile ? 6 : 8),
-                  Text(
-                    isMobile ? 'Online' : 'AI Online',
-                    style: AppTypography.caption(
-                      color: AppColors.accentPositive,
+                    SizedBox(width: isMobile ? 4 : 6),
+                    Text(
+                      isMobile ? 'Online' : 'AI Online',
+                      style: AppTypography.caption(
+                        color: AppColors.accentPositive,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
             const Spacer(),
 
             // Session info - shortened on mobile
-            if (!isMobile)
-              Text(
-                'Wellness Session',
+            Flexible(
+              child: Text(
+                isMobile ? 'Serene AI' : 'Wellness Session',
                 style: AppTypography.h5(
                   color: isDark
                       ? AppColors.primaryTextDark
                       : AppColors.primaryText,
                 ),
-              )
-            else
-              Text(
-                'Serene AI',
-                style: AppTypography.h5(
-                  color: isDark
-                      ? AppColors.primaryTextDark
-                      : AppColors.primaryText,
-                ),
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
 
             const Spacer(),
 
             // Voice mode toggle
-            IconButton(
-              onPressed: () {
-                widget.onVoiceModeToggle();
-                if (widget.isVoiceModeActive) {
-                  _voiceAnimationController.repeat();
-                  _pulseAnimationController.repeat();
-                } else {
-                  _voiceAnimationController.stop();
-                  _pulseAnimationController.stop();
-                }
-              },
-              icon: Icon(
-                widget.isVoiceModeActive ? Icons.keyboard : Icons.mic,
-                color: widget.isVoiceModeActive
-                    ? AppColors.accentPrimary
-                    : (isDark
-                          ? AppColors.primaryTextDark
-                          : AppColors.primaryText),
+            Padding(
+              padding: EdgeInsets.only(right: isMobile ? 2 : 4),
+              child: IconButton(
+                constraints: BoxConstraints(
+                  minWidth: isMobile ? 40 : 44,
+                  minHeight: isMobile ? 40 : 44,
+                ),
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  widget.onVoiceModeToggle();
+                  if (widget.isVoiceModeActive) {
+                    _voiceAnimationController.repeat();
+                    _pulseAnimationController.repeat();
+                  } else {
+                    _voiceAnimationController.stop();
+                    _pulseAnimationController.stop();
+                  }
+                },
+                icon: Icon(
+                  widget.isVoiceModeActive ? Icons.keyboard : Icons.mic,
+                  color: widget.isVoiceModeActive
+                      ? AppColors.accentPrimary
+                      : (isDark
+                            ? AppColors.primaryTextDark
+                            : AppColors.primaryText),
+                ),
+                iconSize: isMobile ? 18 : 20,
               ),
-              iconSize: isMobile ? 22 : 24,
             ),
 
             // Profile toggle
             IconButton(
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 40 : 44,
+                minHeight: isMobile ? 40 : 44,
+              ),
+              padding: EdgeInsets.zero,
               onPressed: widget.onProfileToggle,
               icon: Icon(
                 Icons.person,
@@ -236,7 +252,7 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                     ? AppColors.primaryTextDark
                     : AppColors.primaryText,
               ),
-              iconSize: isMobile ? 22 : 24,
+              iconSize: isMobile ? 18 : 20,
             ),
           ],
         ),
@@ -576,7 +592,10 @@ class _ChatMainPanelState extends State<ChatMainPanel>
     final isMobile = screenWidth < 768;
 
     return Container(
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : 20,
+        vertical: isMobile ? 12 : 16,
+      ),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.secondaryElementDark
@@ -590,34 +609,43 @@ class _ChatMainPanelState extends State<ChatMainPanel>
       ),
       child: SafeArea(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // Attachment button (hidden on mobile when typing to save space)
             if (!isMobile || !_isTyping)
-              IconButton(
-                onPressed: () {
-                  // TODO: Handle attachments
-                },
-                icon: Icon(
-                  Icons.attach_file,
-                  color: isDark
-                      ? AppColors.primaryTextDark.withOpacity(0.7)
-                      : AppColors.primaryText.withOpacity(0.7),
+              Container(
+                width: isMobile ? 40 : 44,
+                height: isMobile ? 40 : 44,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    // TODO: Handle attachments
+                  },
+                  icon: Icon(
+                    Icons.attach_file,
+                    color: isDark
+                        ? AppColors.primaryTextDark.withOpacity(0.7)
+                        : AppColors.primaryText.withOpacity(0.7),
+                  ),
+                  iconSize: isMobile ? 20 : 22,
                 ),
-                iconSize: isMobile ? 24 : 24,
               ),
+
+            // Spacing after attachment button
+            if (!isMobile || !_isTyping) SizedBox(width: isMobile ? 6 : 8),
 
             // Text input
             Expanded(
               child: Container(
                 constraints: BoxConstraints(
-                  minHeight: isMobile ? 44 : 48, // Minimum touch target
-                  maxHeight: isMobile ? 120 : 200, // Prevent overflow
+                  minHeight: isMobile ? 40 : 44, // Minimum touch target
+                  maxHeight: isMobile ? 100 : 150, // Prevent overflow
                 ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? AppColors.primaryBackgroundDark
                       : AppColors.primaryBackground,
-                  borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
+                  borderRadius: BorderRadius.circular(isMobile ? 18 : 22),
                   border: Border.all(
                     color: isDark ? AppColors.dividerDark : AppColors.divider,
                   ),
@@ -635,8 +663,8 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 16 : 20,
-                      vertical: isMobile ? 10 : 12,
+                      horizontal: isMobile ? 14 : 18,
+                      vertical: isMobile ? 8 : 10,
                     ),
                   ),
                   style: AppTypography.bodyMedium(
@@ -656,7 +684,7 @@ class _ChatMainPanelState extends State<ChatMainPanel>
               ),
             ),
 
-            SizedBox(width: isMobile ? 8 : 8),
+            SizedBox(width: isMobile ? 6 : 8),
 
             // Voice recording button (when voice mode is active)
             if (widget.isVoiceModeActive) ...[
@@ -665,8 +693,8 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                 onTapUp: (_) => widget.onStopRecording(),
                 onTapCancel: () => widget.onStopRecording(),
                 child: Container(
-                  width: isMobile ? 56 : 60,
-                  height: isMobile ? 56 : 60,
+                  width: isMobile ? 44 : 48,
+                  height: isMobile ? 44 : 48,
                   decoration: BoxDecoration(
                     color: widget.isRecording
                         ? AppColors.accentNegative
@@ -679,25 +707,25 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                                     ? AppColors.accentNegative
                                     : AppColors.accentPrimary)
                                 .withOpacity(0.3),
-                        blurRadius: widget.isRecording ? 15 : 8,
-                        spreadRadius: widget.isRecording ? 5 : 2,
+                        blurRadius: widget.isRecording ? 12 : 6,
+                        spreadRadius: widget.isRecording ? 3 : 1,
                       ),
                     ],
                   ),
                   child: Icon(
                     widget.isRecording ? Icons.stop : Icons.mic,
                     color: Colors.white,
-                    size: isMobile ? 24 : 28,
+                    size: isMobile ? 20 : 24,
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 8 : 8),
+              SizedBox(width: isMobile ? 6 : 8),
             ],
 
             // Send/Voice button with larger touch target on mobile
             Container(
-              width: isMobile ? 44 : 48,
-              height: isMobile ? 44 : 48,
+              width: isMobile ? 40 : 44,
+              height: isMobile ? 40 : 44,
               decoration: BoxDecoration(
                 color: _isTyping
                     ? AppColors.accentPrimary
@@ -715,14 +743,19 @@ class _ChatMainPanelState extends State<ChatMainPanel>
               ),
               child: widget.isTranscribing
                   ? SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(
+                        minWidth: isMobile ? 40 : 44,
+                        minHeight: isMobile ? 40 : 44,
+                      ),
                       onPressed: _isTyping
                           ? _sendMessage
                           : widget.onVoiceModeToggle,
@@ -733,9 +766,9 @@ class _ChatMainPanelState extends State<ChatMainPanel>
                                   ? Icons.keyboard
                                   : Icons.mic),
                         color: Colors.white,
-                        size: isMobile ? 20 : 20,
+                        size: isMobile ? 18 : 20,
                       ),
-                      splashRadius: isMobile ? 22 : 24, // Better touch feedback
+                      splashRadius: isMobile ? 20 : 22, // Better touch feedback
                     ),
             ),
           ],
